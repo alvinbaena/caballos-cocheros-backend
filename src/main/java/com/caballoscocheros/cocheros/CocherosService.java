@@ -7,14 +7,13 @@ package com.caballoscocheros.cocheros;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -25,28 +24,40 @@ import javax.ws.rs.core.Response;
  *
  * @author bquest
  */
+@Path("")
 public class CocherosService {
 
-    @Inject
-    private HorseStable store;
+    private static final Logger LOG = Logger.getLogger(CocherosService.class.getName());
 
-    @Path("/download")
+    private HorseStable store = HorseStable.getInstance();
+
+    /**
+     * Descarga la lista de capturas, si se pasa el parametro se descargan las
+     * capturas despues de la fecha que se especifica.
+     *
+     * <p>
+     * http://157.253.236.146:8060/cocheros/rest/download
+     * </p>
+     *
+     * @param time la fecha opcional en formato ISO8601
+     * (yyyy-MM-dd'T'HH:mm:ss.SSS'Z')
+     * @return
+     */
+    @GET
+    @Path("download")
     @Produces(MediaType.APPLICATION_JSON)
     public Response download(@QueryParam("time") String time) {
-        if (time != null && time.isEmpty()) {
+        if (time != null && !time.isEmpty()) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 Date cd = sdf.parse(time);
 
-                Set<HorseCapture> ret = new HashSet<HorseCapture>();
+                List<HorseCapture> ret = new ArrayList<HorseCapture>();
 
-                while (store.getHorses().hasNext()) {
-                    HorseCapture horse = store.getHorses().next();
-
-                    if (horse.getTime().after(cd)) {
+                for (HorseCapture horse : store.getHorses()) {
+                    Date hd = sdf.parse(horse.getTime());
+                    if (hd.after(cd)) {
                         ret.add(horse);
-                    } else {
-                        break;
                     }
                 }
 
@@ -55,10 +66,9 @@ public class CocherosService {
                 return Response.serverError().build();
             }
         } else {
-            Set<HorseCapture> ret = new HashSet<HorseCapture>();
+            List<HorseCapture> ret = new ArrayList<HorseCapture>();
 
-            while (store.getHorses().hasNext()) {
-                HorseCapture horse = store.getHorses().next();
+            for (HorseCapture horse : store.getHorses()) {
                 ret.add(horse);
             }
 
@@ -66,7 +76,18 @@ public class CocherosService {
         }
     }
 
-    @Path("/upload")
+    /**
+     * Punto para subir capturas.
+     *
+     * @param captures la lista de capturas a subir.
+     *
+     * <p>
+     * http://157.253.236.146:8060/cocheros/rest/upload
+     * </p>
+     * @return 200
+     */
+    @POST
+    @Path("upload")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response upload(List<HorseCapture> captures) {
         for (HorseCapture capture : captures) {

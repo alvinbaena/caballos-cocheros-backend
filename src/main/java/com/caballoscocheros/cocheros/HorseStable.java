@@ -5,36 +5,36 @@
  */
 package com.caballoscocheros.cocheros;
 
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentSkipListSet;
-import javax.enterprise.context.ApplicationScoped;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * @author bquest
  */
-@ApplicationScoped
 public class HorseStable {
+    
+    private static HorseStable instance;
 
-    private final ConcurrentSkipListSet<HorseCapture> store = new ConcurrentSkipListSet<HorseCapture>(new Comparator<HorseCapture>() {
-
-        @Override
-        public int compare(HorseCapture o1, HorseCapture o2) {
-            return o1.getTime().compareTo(o2.getTime());
+    private final Set<HorseCapture> store = Collections.synchronizedSet(new HashSet<HorseCapture>());
+    
+    public static HorseStable getInstance(){
+        if (instance == null){
+            instance = new HorseStable();
         }
-    });
+        
+        return instance;
+    }
+        
+    private HorseStable(){
+    }
 
     public void addHorse(HorseCapture hc) {
         store.add(hc);
     }
 
-    /**
-     * Ascendiente
-     *
-     * @return Iterador descendente por fecha.
-     */
-    public Iterator<HorseCapture> getHorses() {
-        return store.descendingIterator();
+    public Set<HorseCapture> getHorses(){
+        return store;
     }
 }

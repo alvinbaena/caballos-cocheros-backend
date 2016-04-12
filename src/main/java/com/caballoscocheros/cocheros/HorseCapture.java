@@ -6,11 +6,13 @@
 package com.caballoscocheros.cocheros;
 
 import java.util.Date;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author bquest
  */
+@XmlRootElement
 public class HorseCapture {
 
     /*
@@ -24,8 +26,8 @@ public class HorseCapture {
      }
      */
     private String uuid;
-    private Date time;
-    private Date syncTime;
+    private String time;
+    private String syncTime;
     private Double longitude;
     private Double latitude;
     private String plate;
@@ -38,19 +40,19 @@ public class HorseCapture {
         this.uuid = uuid;
     }
 
-    public Date getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(Date time) {
+    public void setTime(String time) {
         this.time = time;
     }
 
-    public Date getSyncTime() {
+    public String getSyncTime() {
         return syncTime;
     }
 
-    public void setSyncTime(Date syncTime) {
+    public void setSyncTime(String syncTime) {
         this.syncTime = syncTime;
     }
 
@@ -76,6 +78,35 @@ public class HorseCapture {
 
     public void setPlate(String plate) {
         this.plate = plate;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 31 * hash + (this.uuid != null ? this.uuid.hashCode() : 0);
+        hash = 31 * hash + (this.time != null ? this.time.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final HorseCapture other = (HorseCapture) obj;
+        if ((this.uuid == null) ? (other.uuid != null) : !this.uuid.equals(other.uuid)) {
+            return false;
+        }
+        if ((this.time == null) ? (other.time != null) : !this.time.equals(other.time)) {
+            return false;
+        }
+        return true;
     }
     
     
